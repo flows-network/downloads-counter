@@ -60,12 +60,20 @@ async fn handler(
 
     let download_url = "https://raw.githubusercontent.com/second-state/llama-utils/main/run-llm.sh";
 
+    // send_response(
+    //     302,
+    //     vec![(
+    //         String::from("content-type"),
+    //         String::from("text/plain; charset=UTF-8"),
+    //     )],
+    //     format!("Location: {}", download_url).as_bytes().to_vec(),
+    // );
+
     send_response(
-        302,
-        vec![(
-            String::from("content-type"),
-            String::from("text/plain; charset=UTF-8"),
-        )],
-        format!("Location: {}", download_url).as_bytes().to_vec(),
+        302, // HTTP status code for Found (Redirection)
+        vec![
+            ("Location".to_string(), download_url.to_string()), // Redirect URL in the Location header
+        ],
+        Vec::new(), // No body for a redirection response
     );
 }
