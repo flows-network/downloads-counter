@@ -4,7 +4,6 @@ use serde_json::Value;
 use std::collections::HashMap;
 use std::env;
 use store_flows::{get, set};
-
 use webhook_flows::{create_endpoint, request_handler, send_response};
 
 #[no_mangle]
@@ -26,21 +25,40 @@ async fn handler(
     let marker_str = env::var("MARKER_STR").unwrap_or(String::from("download_sh"));
 
     match _qry.get("marker_str") {
-        Some(m) => match m {
-            Value::String(s) => if s == marker_str {},
-            _ => return,
+        Some(m) => match serde_json::from_value::<String>(m.clone()) {
+            Ok(s) => {
+                if s != marker_str {
+                    log::error!("invalid marker_str: {}", marker_str);
+                    return;
+                }
+            }
+            Err(_e) => {
+                log::error!("failed to parse marker_str: {}", _e);
+                return;
+            }
         },
-        _ => return,
+        _ => {
+            log::error!("missing marker_str");
+            return;
+        }
     }
 
-    // bash <(curl -sSf https://raw.githubusercontent.com/second-state/llama-utils/main/run-llm.sh)
+    let mut download_count = match get("download_count") {
+        Some(val) => match serde_json::from_value::<i32>(val) {
+            Ok(n) => n,
+            Err(_e) => {
+                log::error!("failed to parse data from store: {}", _e);
+                0
+            }
+        },
+        None => 0,
+    };
+    download_count += 1;
+    set("download_count", serde_json::json!(download_count), None);
+
+    log::error!("Downloads_count: {}", download_count);
+
     let download_url = "https://raw.githubusercontent.com/second-state/llama-utils/main/run-llm.sh";
-
-    let mut count = get("download_count").unwrap_or(0);
-    count = count + 1;
-    set("download_count", count, None).unwrap();
-
-    log::error!("Downloads_count: {}", count);
 
     send_response(
         302,
@@ -48,6 +66,6 @@ async fn handler(
             String::from("content-type"),
             String::from("text/plain; charset=UTF-8"),
         )],
-        download_url.as_bytes().to_vec(),
+        format!("Location: {}", download_url).as_bytes().to_vec(),
     );
 }
