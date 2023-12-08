@@ -2,7 +2,7 @@ use dotenv::dotenv;
 use flowsnet_platform_sdk::logger;
 use serde_json::Value;
 use std::collections::HashMap;
-use std::env;
+// use std::env;
 use store_flows::{get, set};
 use webhook_flows::{create_endpoint, request_handler, send_response};
 
@@ -15,23 +15,26 @@ pub async fn on_deploy() {
 
 async fn create_map() -> HashMap<String, String> {
     let json_contents = include_str!("../URLS.json");
-
-    let urls: Vec<String> = serde_json::from_str(json_contents).expect("failed to parse json");
-
-    let files = env::var("FILES").unwrap_or(String::from(
-        "https://raw.githubusercontent.com/second-state/llama-utils/main/run-llm.sh",
-    ));
-
     let mut paths_list = Vec::<String>::new();
 
-    paths_list.extend(urls.into_iter());
-    paths_list.extend(files.split_ascii_whitespace().map(String::from));
+    match serde_json::from_str::<Vec<String>>(json_contents) {
+        Ok(urls) => paths_list.extend(urls.into_iter()),
+        Err(_e) => log::error!("failed to parse URLS.json: {}", _e),
+    };
+
+    // let files = env::var("FILES").unwrap_or(String::from(
+    //     "https://raw.githubusercontent.com/second-state/llama-utils/main/run-llm.sh",
+    // ));
+    // paths_list.extend(files.split_ascii_whitespace().map(String::from));
 
     paths_list
         .iter()
-        .map(|u| {
-            let file = u.rsplitn(2, '/').nth(0).unwrap_or(&String::new()).to_string();
-            (file, u.clone())
+        .filter_map(|u| {
+            if let Some(file) = u.rsplitn(2, '/').nth(0) {
+                Some((file.to_string(), u.clone()))
+            } else {
+                None
+            }
         })
         .collect::<HashMap<String, String>>()
 }
@@ -88,9 +91,9 @@ async fn handler(
         None => 0,
     };
     download_count += 1;
-    set("download_count", serde_json::json!(download_count), None);
+    set(&key, serde_json::json!(download_count), None);
 
-    log::info!("Downloads_count: {}", download_count);
+    log::info!("{} downloaed {} times", key, download_count);
 
     send_response(
         302, // HTTP status code for Found (Redirection)
