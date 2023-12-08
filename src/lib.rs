@@ -2,9 +2,67 @@ use dotenv::dotenv;
 use flowsnet_platform_sdk::logger;
 use serde_json::Value;
 use std::collections::HashMap;
-// use std::env;
-use store_flows::{get, set};
-use webhook_flows::{create_endpoint, request_handler, send_response};
+use webhook_flows::{
+    create_endpoint, request_handler,
+    route::{get, options, route, RouteError, Router},
+    send_response,
+};
+
+#[request_handler]
+async fn handle() {
+    let mut router = Router::new();
+
+    router
+        .insert("/query/:count", vec![options(opt), get(query)])
+        .unwrap();
+
+    if let Err(e) = route(router).await {
+        match e {
+            RouteError::NotFound => {
+                send_response(404, vec![], b"No route matched".to_vec());
+            }
+            RouteError::MethodNotAllowed => {
+                send_response(405, vec![], b"Method not allowed".to_vec());
+            }
+        }
+    }
+}
+
+async fn query(_headers: Vec<(String, String)>, qry: HashMap<String, Value>, _body: Vec<u8>) {
+    let mut file = String::new();
+
+    match qry.get("count") {
+        Some(m) => match serde_json::from_value::<String>(m.clone()) {
+            Ok(s) => file = s,
+            Err(_e) => {
+                log::error!("failed to parse file_name from query: {}", _e);
+                return;
+            }
+        },
+        _ => {
+            log::error!("Failed to find anything to query: {}", file);
+            return;
+        }
+    }
+
+    let download_count = match store_flows::get(&file) {
+        Some(val) => match serde_json::from_value::<i32>(val) {
+            Ok(n) => n,
+            Err(_e) => {
+                log::error!("{} hasn't been downloaded: {}", file, _e);
+                0
+            }
+        },
+        None => 0,
+    };
+    send_response(
+        200,
+        vec![(String::from("content-type"), String::from("text/html"))],
+        format!("{} has been downloaded {} times", file, download_count)
+            .as_bytes()
+            .to_vec(),
+    );
+}
 
 #[no_mangle]
 #[tokio::main(flavor = "current_thread")]
@@ -21,11 +79,6 @@ async fn create_map() -> HashMap<String, String> {
         Ok(urls) => paths_list.extend(urls.into_iter()),
         Err(_e) => log::error!("failed to parse URLS.json: {}", _e),
     };
-
-    // let files = env::var("FILES").unwrap_or(String::from(
-    //     "https://raw.githubusercontent.com/second-state/llama-utils/main/run-llm.sh",
-    // ));
-    // paths_list.extend(files.split_ascii_whitespace().map(String::from));
 
     paths_list
         .iter()
@@ -91,7 +144,7 @@ async fn handler(
         None => 0,
     };
     download_count += 1;
-    set(&key, serde_json::json!(download_count), None);
+    store_flows::set(&key, serde_json::json!(download_count), None);
 
     log::info!("{} downloaed {} times", key, download_count);
 
