@@ -25,7 +25,7 @@ async fn handler(
     logger::init();
 
     let mut router = Router::new();
-    router.insert("/options", vec![options(opt)]).unwrap();
+    router.insert("", vec![get(opt)]).unwrap();
 
     router.insert("/query/:count", vec![get(query)]).unwrap();
 
