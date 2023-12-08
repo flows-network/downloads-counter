@@ -4,7 +4,7 @@ use serde_json::Value;
 use std::collections::HashMap;
 use webhook_flows::{
     create_endpoint, request_handler,
-    route::{get, route, RouteError, Router},
+    route::{get, options, route, RouteError, Router},
     send_response,
 };
 
@@ -24,13 +24,24 @@ async fn handler(
 ) {
     logger::init();
 
-    // let mut router = Router::new();
+    let mut router = Router::new();
+    router.insert("/options", vec![options(opt)]).unwrap();
 
-    // router
-    //     .insert("/query/:count", vec![get(query)])
-    //     .unwrap();
+    router.insert("/query/:count", vec![get(query)]).unwrap();
 
+    if let Err(e) = route(router).await {
+        match e {
+            RouteError::NotFound => {
+                send_response(404, vec![], b"No route matched".to_vec());
+            }
+            RouteError::MethodNotAllowed => {
+                send_response(405, vec![], b"Method not allowed".to_vec());
+            }
+        }
+    }
+}
 
+async fn opt(_headers: Vec<(String, String)>, _qry: HashMap<String, Value>, _body: Vec<u8>) {
     let urls_map = create_map().await;
 
     let mut key = String::new();
@@ -85,18 +96,6 @@ async fn handler(
         ],
         Vec::new(), // No body for a redirection response
     );
-
-    // if let Err(e) = route(router).await {
-    //     match e {
-    //         RouteError::NotFound => {
-    //             send_response(404, vec![], b"No route matched".to_vec());
-    //         }
-    //         RouteError::MethodNotAllowed => {
-    //             send_response(405, vec![], b"Method not allowed".to_vec());
-    //         }
-    //     }
-    // }
-
 }
 
 async fn query(_headers: Vec<(String, String)>, qry: HashMap<String, Value>, _body: Vec<u8>) {
@@ -155,7 +154,6 @@ async fn create_map() -> HashMap<String, String> {
         })
         .collect::<HashMap<String, String>>()
 }
-
 
 /* async fn track_and_redirect<F>(_qry: HashMap<String, Value>) -> Option<String> {
     let urls_map = create_map().await;
