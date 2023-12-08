@@ -13,6 +13,29 @@ pub async fn on_deploy() {
     create_endpoint().await;
 }
 
+async fn create_map() -> HashMap<String, String> {
+    let json_contents = include_str!("../URLS.json");
+
+    let urls: Vec<String> = serde_json::from_str(json_contents).expect("failed to parse json");
+
+    let files = env::var("FILES").unwrap_or(String::from(
+        "https://raw.githubusercontent.com/second-state/llama-utils/main/run-llm.sh",
+    ));
+
+    let mut paths_list = Vec::<String>::new();
+
+    paths_list.extend(urls.into_iter());
+    paths_list.extend(files.split_ascii_whitespace().map(String::from));
+
+    paths_list
+        .iter()
+        .map(|u| {
+            let file = u.rsplitn(2, '/').nth(0).unwrap_or(&String::new()).to_string();
+            (file, u.clone())
+        })
+        .collect::<HashMap<String, String>>()
+}
+
 #[request_handler(GET, POST)]
 async fn handler(
     _headers: Vec<(String, String)>,
@@ -22,17 +45,18 @@ async fn handler(
 ) {
     logger::init();
 
-    let file = env::var("FILE").unwrap_or(String::from("run-llm.sh"));
-    let download_url = env::var("DOWNLOAD_URL").unwrap_or(String::from(
-        "https://raw.githubusercontent.com/second-state/llama-utils/main/run-llm.sh",
-    ));
+    let urls_map = create_map().await;
+
+    let mut key = String::new();
 
     match _qry.get("file") {
         Some(m) => match serde_json::from_value::<String>(m.clone()) {
             Ok(s) => {
-                if s != file {
+                if !urls_map.contains_key(&s) {
                     log::error!("invalid file_name: {}", s);
                     return;
+                } else {
+                    key = s;
                 }
             }
             Err(_e) => {
@@ -46,7 +70,14 @@ async fn handler(
         }
     }
 
-    let mut download_count = match get("download_count") {
+    let download_url = match urls_map.get(&key) {
+        Some(m) => m,
+        None => {
+            log::error!("missing download_url for file: {}", key);
+            return;
+        }
+    };
+    let mut download_count = match get(&key) {
         Some(val) => match serde_json::from_value::<i32>(val) {
             Ok(n) => n,
             Err(_e) => {
