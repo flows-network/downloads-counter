@@ -24,11 +24,11 @@ async fn handler(
 ) {
     logger::init();
 
-    let mut router = Router::new();
+    // let mut router = Router::new();
 
-    router
-        .insert("/query/:count", vec![get(query)])
-        .unwrap();
+    // router
+    //     .insert("/query/:count", vec![get(query)])
+    //     .unwrap();
 
 
     let urls_map = create_map().await;
@@ -86,16 +86,16 @@ async fn handler(
         Vec::new(), // No body for a redirection response
     );
 
-    if let Err(e) = route(router).await {
-        match e {
-            RouteError::NotFound => {
-                send_response(404, vec![], b"No route matched".to_vec());
-            }
-            RouteError::MethodNotAllowed => {
-                send_response(405, vec![], b"Method not allowed".to_vec());
-            }
-        }
-    }
+    // if let Err(e) = route(router).await {
+    //     match e {
+    //         RouteError::NotFound => {
+    //             send_response(404, vec![], b"No route matched".to_vec());
+    //         }
+    //         RouteError::MethodNotAllowed => {
+    //             send_response(405, vec![], b"Method not allowed".to_vec());
+    //         }
+    //     }
+    // }
 
 }
 
