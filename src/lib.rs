@@ -22,23 +22,26 @@ async fn handler(
 ) {
     logger::init();
 
-    let marker_str = env::var("MARKER_STR").unwrap_or(String::from("download_sh"));
+    let file = env::var("FILE").unwrap_or(String::from("run-llm.sh"));
+    let download_url = env::var("DOWNLOAD_URL").unwrap_or(String::from(
+        "https://raw.githubusercontent.com/second-state/llama-utils/main/run-llm.sh",
+    ));
 
-    match _qry.get("marker_str") {
+    match _qry.get("file") {
         Some(m) => match serde_json::from_value::<String>(m.clone()) {
             Ok(s) => {
-                if s != marker_str {
-                    log::error!("invalid marker_str: {}", marker_str);
+                if s != file {
+                    log::error!("invalid file_name: {}", s);
                     return;
                 }
             }
             Err(_e) => {
-                log::error!("failed to parse marker_str: {}", _e);
+                log::error!("failed to parse file_name: {}", _e);
                 return;
             }
         },
         _ => {
-            log::error!("missing marker_str");
+            log::error!("missing file_name");
             return;
         }
     }
@@ -47,7 +50,7 @@ async fn handler(
         Some(val) => match serde_json::from_value::<i32>(val) {
             Ok(n) => n,
             Err(_e) => {
-                log::error!("failed to parse data from store: {}", _e);
+                log::error!("failed to parse download_count from store: {}", _e);
                 0
             }
         },
@@ -56,18 +59,7 @@ async fn handler(
     download_count += 1;
     set("download_count", serde_json::json!(download_count), None);
 
-    log::error!("Downloads_count: {}", download_count);
-
-    let download_url = "https://raw.githubusercontent.com/second-state/llama-utils/main/run-llm.sh";
-
-    // send_response(
-    //     302,
-    //     vec![(
-    //         String::from("content-type"),
-    //         String::from("text/plain; charset=UTF-8"),
-    //     )],
-    //     format!("Location: {}", download_url).as_bytes().to_vec(),
-    // );
+    log::info!("Downloads_count: {}", download_count);
 
     send_response(
         302, // HTTP status code for Found (Redirection)
