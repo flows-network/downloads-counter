@@ -26,7 +26,7 @@ async fn handler(
 
     let mut router = Router::new();
     router
-        .insert("/redir/:file_name", vec![get(track_and_redirect)])
+        .insert("/:file_name", vec![get(track_and_redirect)])
         .unwrap();
 
     router
@@ -121,12 +121,16 @@ async fn get_download_counts(
                     },
                     None => 0,
                 };
+
+                let response_json = serde_json::json!({
+                    "name": file_name,
+                    "counts": download_count
+                });
+
                 send_response(
                     200,
-                    vec![(String::from("content-type"), String::from("text/html"))],
-                    format!("{} has been downloaded {} times", file_name, download_count)
-                        .as_bytes()
-                        .to_vec(),
+                    vec![("content-type".to_string(), "application/json".to_string())],
+                    response_json.to_string().as_bytes().to_vec(),
                 );
             }
             Err(_e) => {
