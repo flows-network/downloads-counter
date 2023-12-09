@@ -17,12 +17,16 @@ Step 3: Go get the webhook url on flows.network
 
 Step 4: Start using the downloads counter by replacing the original download link with the new link assembled like this:
 ```
-https://code.flows.network/webhook/5xAx1Yru2BqZ9PUacb3q/redir/FILENAME
+https://code.flows.network/webhook/5xAx1Yru2BqZ9PUacb3q/FILENAME
 ```
 
 Step 5: Check the download count of the file of interest by visiting a link like this:
 ```
 https://code.flows.network/webhook/5xAx1Yru2BqZ9PUacb3q/count/FILENAME
+```
+You'll get a response like this:
+```json
+{"counts":13,"name":"run-llm.sh"}
 ```
 
 
