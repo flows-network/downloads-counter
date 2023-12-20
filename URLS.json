@@ -31,6 +31,6 @@
     "https://huggingface.co/second-state/Starling-LM-7B-alpha-GGUF/resolve/main/starling-lm-7b-alpha.Q5_K_M.gguf",
     "https://huggingface.co/second-state/Calm2-7B-Chat-GGUF/blob/main/calm2-7b-chat.Q4_K_M.gguf",
     "https://huggingface.co/second-state/Deepseek-Coder-6.7B-Instruct-GGUF/resolve/main/deepseek-coder-6.7b-instruct.Q5_K_M.gguf",
-    "https://huggingface.co/second-state/Deepseek-LLM-7B-Chat-GGUF/resolve/main/deepseek-llm-7b-chat.Q5_K_M.gguf"
+    "https://huggingface.co/second-state/Deepseek-LLM-7B-Chat-GGUF/resolve/main/deepseek-llm-7b-chat.Q5_K_M.gguf",
     "https://raw.githubusercontent.com/second-state/llama-utils/main/run-llm.sh"
 ]
