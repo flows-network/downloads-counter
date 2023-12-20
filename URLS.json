@@ -1,4 +1,10 @@
 [
     "https://github.com/second-state/llama-utils/raw/main/chat/llama-chat.wasm",
+    "https://github.com/second-state/llama-utils/blob/main/api-server/llama-api-server.wasm",
+    "https://huggingface.co/second-state/Llama-2-7B-Chat-GGUF/resolve/main/llama-2-7b-chat.Q5_K_M.gguf",
+    "https://huggingface.co/second-state/Llama-2-13B-Chat-GGUF/resolve/main/llama-2-13b-chat.Q5_K_M.gguf",
+    "https://huggingface.co/second-state/BELLE-Llama2-13B-Chat-0.4M-GGUF/resolve/main/BELLE-Llama2-13B-Chat-0.4M-ggml-model-q4_0.gguf",
+    "https://huggingface.co/second-state/Mistral-7B-Instruct-v0.1-GGUF/resolve/main/mistral-7b-instruct-v0.1.Q5_K_M.gguf",
+    "curl -LO https://huggingface.co/second-state/TinyLlama-1.1B-Chat-v0.3-GGUF/resolve/main/tinyllama-1.1b-chat-v0.3.Q5_K_M.gguf",
     "https://raw.githubusercontent.com/second-state/llama-utils/main/run-llm.sh"
 ]
