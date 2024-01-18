@@ -2,7 +2,7 @@
     "https://github.com/second-state/llama-utils/releases/latest/download/llama-chat.wasm",
     "https://github.com/second-state/llama-utils/releases/latest/download/llama-api-server.wasm",
     "https://huggingface.co/second-state/Nous-Hermes-2-Mixtral-8x7B-SFT-GGUF/resolve/main/Nous-Hermes-2-Mixtral-8x7B-SFT-Q5_K_M.gguf",
-    "https://huggingface.co/NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO-GGUF/resolve/main/Nous-Hermes-2-Mixtral-8x7B-DPO.Q5_K_M.gguf",
+    "https://huggingface.co/second-state/Nous-Hermes-2-Mixtral-8x7B-DPO-GGUF/resolve/main/Nous-Hermes-2-Mixtral-8x7B-DPO-Q5_K_M.gguf",
     "https://huggingface.co/second-state/OpenChat-3.5-0106-GGUF/resolve/main/openchat-3.5-0106-Q5_K_M.gguf",
     "https://huggingface.co/second-state/openchat-3.5-1210-GGUF/resolve/main/openchat-3.5-1210.Q5_K_M.gguf",
     "https://huggingface.co/second-state/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q5_K_M.gguf",
